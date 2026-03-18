@@ -50,17 +50,17 @@ This repository uses a nested app folder:
 
 Run all npm commands from the app directory (`./src`).
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
+    data-video-type="youtube|vimeo|html5"
+    data-video-url="https://..."
+    data-poster-url="https://..."
+    data-show-title="true|false"
+    data-show-time="true|false"
 - npm
 
 ### Install
 
 ```bash
-cd src
+- `data-poster-url` (optional): custom poster image for all providers; when present, it overrides provider thumbnail fallback
 npm install
 ```
 
@@ -99,19 +99,6 @@ Define one container per video:
 ```html
 <div
     class="video-shell"
-
-## Runtime API
-
-Core initialization flow:
-
-- `initAllVideoShells(root = document)` scans for `.video-shell` nodes.
-- `initVideoShell(shell)` routes by `data-video-type`.
-- Provider entry points are:
-    - `initYouTube(shell, videoUrl)`
-    - `initVimeo(shell, videoUrl)`
-    - `initHtml5(shell, videoUrl)`
-
-Poster rendering and updates are handled in `poster.js`, while shared helpers (duration formatting, URL title parsing, timed metadata fetch) live in `utils.js`.
     data-video-type="youtube|vimeo|html5"
     data-video-url="https://..."
     data-poster-url="https://..."
@@ -122,7 +109,7 @@ Poster rendering and updates are handled in `poster.js`, while shared helpers (d
 
 - `data-video-type` (required): `youtube`, `vimeo`, or `html5`
 - `data-video-url` (required): source video URL
-- `data-poster-url` (optional): custom poster image (mainly useful for HTML5)
+- `data-poster-url` (optional): custom poster image for all providers; when present, it overrides provider thumbnail fallback
 - `data-show-title` (optional): controls title badge visibility; default is `true`
 - `data-show-time` (optional): controls duration/time badge visibility; default is `true`
 
@@ -139,6 +126,19 @@ Example that hides both title and time:
     data-show-time="false"
 ></div>
 ```
+
+## Runtime API
+
+Core initialization flow:
+
+- `initAllVideoShells(root = document)` scans for `.video-shell` nodes.
+- `initVideoShell(shell)` routes by `data-video-type`.
+- Provider entry points are:
+    - `initYouTube(shell, videoUrl)`
+    - `initVimeo(shell, videoUrl)`
+    - `initHtml5(shell, videoUrl)`
+
+Poster rendering and updates are handled in `poster.js`, while shared helpers (duration formatting, URL title parsing, timed metadata fetch) live in `utils.js`.
 
 ## Deploy to GitHub Pages
 
