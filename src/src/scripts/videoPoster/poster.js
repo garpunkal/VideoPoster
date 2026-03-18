@@ -1,10 +1,10 @@
-function parseBoolDataAttr(value, defaultValue = true) {
-  if (value == null) return defaultValue;
-  const normalized = String(value).trim().toLowerCase();
-  return !["false", "0", "no", "off"].includes(normalized);
-}
-
 export function getPosterMetaSettings(shell) {
+  function parseBoolDataAttr(value, defaultValue = true) {
+    if (value == null) return defaultValue;
+    const normalized = String(value).trim().toLowerCase();
+    return !["false", "0", "no", "off"].includes(normalized);
+  }
+
   return {
     showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), true),
     showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), true)
@@ -51,7 +51,6 @@ export function createPoster(initialTitle, initialTime, posterUrl, metaSettings 
   const playGlyph = document.createElement("span");
   playGlyph.className = "play-glyph";
   playGlyph.textContent = "\u25b6";
-  playGlyph.style.color = "#0b63f6";
   playTile.append(playGlyph);
 
   const sr = document.createElement("span");
@@ -66,7 +65,7 @@ export function updatePosterMeta(poster, payload) {
   const showTitle = poster.dataset.showTitle !== "false";
   const showTime = poster.dataset.showTime !== "false";
 
-  if (payload.title) {
+  if ("title" in payload) {
     const title = poster.querySelector(".title-badge");
     const sr = poster.querySelector(".sr-only");
     if (title) {
@@ -81,7 +80,7 @@ export function updatePosterMeta(poster, payload) {
     poster.setAttribute("aria-label", "Play " + payload.title);
   }
 
-  if (payload.time) {
+  if ("time" in payload) {
     const time = poster.querySelector(".time-badge");
     if (time) {
       time.textContent = payload.time;
@@ -93,11 +92,15 @@ export function updatePosterMeta(poster, payload) {
     }
   }
 
-  if (payload.thumbUrl) {
+  if ("thumbUrl" in payload && payload.thumbUrl) {
     poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
   }
 }
 
 export function setError(shell, message) {
-  shell.innerHTML = '<div class="error-label">' + message + "</div>";
+  shell.replaceChildren();
+  const error = document.createElement("div");
+  error.className = "error-label";
+  error.textContent = message;
+  shell.append(error);
 }

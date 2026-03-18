@@ -1,7 +1,7 @@
 import { createPoster, getPosterMetaSettings, setError, updatePosterMeta } from "../poster.js";
 import { formatDuration, titleFromUrl } from "../utils.js";
 
-export function setupHtml5(shell, videoUrl) {
+export function initHtml5(shell, videoUrl) {
   if (!videoUrl) {
     setError(shell, "Missing HTML5 video URL");
     return;

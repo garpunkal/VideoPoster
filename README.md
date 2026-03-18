@@ -25,13 +25,27 @@ This repository uses a nested app folder:
 |-- LICENSE
 |-- README.md
 `-- src/
-        |-- index.html
-        |-- package.json
-        |-- vite.config.js
-        |-- public/
-        `-- src/
-                |-- main.js
-                `-- style.css
+    |-- index.html
+    |-- package.json
+    |-- package-lock.json
+    |-- vite.config.js
+    |-- public/
+    `-- src/
+        |-- scripts/
+        |   |-- main.js
+        |   `-- videoPoster/
+        |       |-- constants.js
+        |       |-- dom.js
+        |       |-- index.js
+        |       |-- poster.js
+        |       |-- utils.js
+        |       |-- utils.test.js
+        |       `-- providers/
+        |           |-- html5.js
+        |           |-- vimeo.js
+        |           `-- youtube.js
+        `-- styles/
+            `-- style.css
 ```
 
 Run all npm commands from the app directory (`./src`).
@@ -71,6 +85,13 @@ cd src
 npm run preview
 ```
 
+### Run Tests
+
+```bash
+cd src
+npm run test
+```
+
 ## Markup API
 
 Define one container per video:
@@ -78,6 +99,19 @@ Define one container per video:
 ```html
 <div
     class="video-shell"
+
+## Runtime API
+
+Core initialization flow:
+
+- `initAllVideoShells(root = document)` scans for `.video-shell` nodes.
+- `initVideoShell(shell)` routes by `data-video-type`.
+- Provider entry points are:
+    - `initYouTube(shell, videoUrl)`
+    - `initVimeo(shell, videoUrl)`
+    - `initHtml5(shell, videoUrl)`
+
+Poster rendering and updates are handled in `poster.js`, while shared helpers (duration formatting, URL title parsing, timed metadata fetch) live in `utils.js`.
     data-video-type="youtube|vimeo|html5"
     data-video-url="https://..."
     data-poster-url="https://..."
@@ -126,6 +160,7 @@ The Vite config uses `GITHUB_REPOSITORY` to compute the production base path (`/
 
 - Browser autoplay policies usually require user interaction before unmuted playback.
 - Embedded providers (YouTube/Vimeo) may change behavior over time due to API/player policy changes.
+- Poster metadata requests use a short timeout and graceful fallback so delayed oEmbed responses do not block rendering.
 
 ## License
 

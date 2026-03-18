@@ -1,22 +1,22 @@
 import { setError } from "./poster.js";
-import { setupHtml5 } from "./providers/html5.js";
-import { setupVimeo } from "./providers/vimeo.js";
-import { setupYouTube } from "./providers/youtube.js";
+import { initHtml5 } from "./providers/html5.js";
+import { initVimeo } from "./providers/vimeo.js";
+import { initYouTube } from "./providers/youtube.js";
 
 export function initVideoShell(shell) {
   const type = shell.dataset.videoType;
   const videoUrl = shell.dataset.videoUrl;
 
   if (type === "youtube") {
-    setupYouTube(shell, videoUrl);
+    initYouTube(shell, videoUrl);
     return;
   }
   if (type === "vimeo") {
-    setupVimeo(shell, videoUrl);
+    initVimeo(shell, videoUrl);
     return;
   }
   if (type === "html5") {
-    setupHtml5(shell, videoUrl);
+    initHtml5(shell, videoUrl);
     return;
   }
 

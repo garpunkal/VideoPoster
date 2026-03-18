@@ -10,41 +10,21 @@ export function formatDuration(seconds) {
   return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
 
-export function captureVideoFrame(video) {
-  try {
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.82);
-  } catch {
-    return "";
-  }
-}
+export async function fetchJsonWithTimeout(url, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(function () {
+    controller.abort();
+  }, timeoutMs);
 
-export function captureVideoFrameAt(video, targetTime) {
-  return new Promise(function (resolve) {
-    const originalTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
-    let completed = false;
-    function cleanup() {
-      video.removeEventListener("seeked", onSeeked);
-      video.removeEventListener("error", onError);
-    }
-    function finalize(frame) {
-      if (completed) return;
-      completed = true;
-      cleanup();
-      try { video.currentTime = originalTime; } catch {}
-      resolve(frame || "");
-    }
-    function onSeeked() { finalize(captureVideoFrame(video)); }
-    function onError() { finalize(""); }
-    video.addEventListener("seeked", onSeeked);
-    video.addEventListener("error", onError);
-    try { video.currentTime = targetTime; } catch { finalize(captureVideoFrame(video)); }
-    setTimeout(function () { finalize(""); }, 1800);
-  });
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export function titleFromUrl(url) {
