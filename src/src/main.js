@@ -49,9 +49,11 @@ function createPoster(initialTitle, initialTime, posterUrl) {
 }
 
 function updatePosterMeta(poster, payload) {
+  console.log("updatePosterMeta called", payload);
   if (payload.title) {
     const title = poster.querySelector(".title-badge");
     const sr = poster.querySelector(".sr-only");
+    console.log("Setting title:", payload.title, title, sr);
     title.textContent = payload.title;
     sr.textContent = "Play " + payload.title;
     poster.setAttribute("aria-label", "Play " + payload.title);
@@ -59,10 +61,12 @@ function updatePosterMeta(poster, payload) {
   }
   if (payload.time) {
     const time = poster.querySelector(".time-badge");
+    console.log("Setting time:", payload.time, time);
     time.textContent = payload.time;
     time.classList.remove("hidden");
   }
   if (payload.thumbUrl) {
+    console.log("Setting thumbUrl:", payload.thumbUrl);
     poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
   }
 }
