@@ -41,10 +41,12 @@ export function initYouTube(shell, videoUrl) {
   }
 
   const titleFallback = "YouTube Video";
+  const customPosterUrl = shell.getAttribute("data-poster-url") || "";
   const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
+  const initialPosterUrl = customPosterUrl || thumbUrl;
   const iframe = createIframe(titleFallback, ALLOW.youtube);
   const metaSettings = getPosterMetaSettings(shell);
-  const poster = createPoster(titleFallback, "--:--", thumbUrl, metaSettings);
+  const poster = createPoster(titleFallback, "--:--", initialPosterUrl, metaSettings);
 
   poster.addEventListener("click", function () {
     poster.classList.add("hidden");
@@ -61,5 +63,9 @@ export function initYouTube(shell, videoUrl) {
       }
     });
 
-  updatePosterMeta(poster, { title: titleFallback, time: "--:--", thumbUrl });
+  const posterMeta = { title: titleFallback, time: "--:--" };
+  if (!customPosterUrl) {
+    posterMeta.thumbUrl = thumbUrl;
+  }
+  updatePosterMeta(poster, posterMeta);
 }

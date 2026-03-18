@@ -38,9 +38,10 @@ export function initVimeo(shell, videoUrl) {
   }
 
   const titleFallback = "Vimeo Video";
+  const customPosterUrl = shell.getAttribute("data-poster-url") || "";
   const iframe = createIframe(titleFallback, ALLOW.vimeo);
   const metaSettings = getPosterMetaSettings(shell);
-  const poster = createPoster(titleFallback, "--:--", "", metaSettings);
+  const poster = createPoster(titleFallback, "--:--", customPosterUrl, metaSettings);
 
   poster.addEventListener("click", function () {
     poster.classList.add("hidden");
@@ -55,7 +56,7 @@ export function initVimeo(shell, videoUrl) {
       if (data && data.title) {
         updatePosterMeta(poster, { title: data.title });
       }
-      if (data && data.thumbnail_url) {
+      if (!customPosterUrl && data && data.thumbnail_url) {
         updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
       }
       if (data && data.duration) {
