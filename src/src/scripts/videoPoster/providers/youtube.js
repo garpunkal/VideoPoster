@@ -63,7 +63,7 @@ export function setupYouTube(shell, videoUrl) {
         updatePosterMeta(poster, { title: data.title });
       }
     })
-    .catch(() => {});
+    .catch(() => { });
 
   updatePosterMeta(poster, { title: titleFallback, time: "--:--", thumbUrl });
 }
