@@ -30,17 +30,17 @@
 })();
 //#endregion
 //#region src/scripts/videoPoster/poster.js
-function parseBoolDataAttr(value, defaultValue = true) {
-	if (value == null) return defaultValue;
-	const normalized = String(value).trim().toLowerCase();
-	return ![
-		"false",
-		"0",
-		"no",
-		"off"
-	].includes(normalized);
-}
 function getPosterMetaSettings(shell) {
+	function parseBoolDataAttr(value, defaultValue = true) {
+		if (value == null) return defaultValue;
+		const normalized = String(value).trim().toLowerCase();
+		return ![
+			"false",
+			"0",
+			"no",
+			"off"
+		].includes(normalized);
+	}
 	return {
 		showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), true),
 		showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), true)
@@ -75,7 +75,6 @@ function createPoster(initialTitle, initialTime, posterUrl, metaSettings = {
 	const playGlyph = document.createElement("span");
 	playGlyph.className = "play-glyph";
 	playGlyph.textContent = "▶";
-	playGlyph.style.color = "#0b63f6";
 	playTile.append(playGlyph);
 	const sr = document.createElement("span");
 	sr.className = "sr-only";
@@ -86,7 +85,7 @@ function createPoster(initialTitle, initialTime, posterUrl, metaSettings = {
 function updatePosterMeta(poster, payload) {
 	const showTitle = poster.dataset.showTitle !== "false";
 	const showTime = poster.dataset.showTime !== "false";
-	if (payload.title) {
+	if ("title" in payload) {
 		const title = poster.querySelector(".title-badge");
 		const sr = poster.querySelector(".sr-only");
 		if (title) {
@@ -96,7 +95,7 @@ function updatePosterMeta(poster, payload) {
 		if (sr) sr.textContent = "Play " + payload.title;
 		poster.setAttribute("aria-label", "Play " + payload.title);
 	}
-	if (payload.time) {
+	if ("time" in payload) {
 		const time = poster.querySelector(".time-badge");
 		if (time) {
 			time.textContent = payload.time;
@@ -104,10 +103,14 @@ function updatePosterMeta(poster, payload) {
 			else time.classList.remove("hidden");
 		}
 	}
-	if (payload.thumbUrl) poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
+	if ("thumbUrl" in payload && payload.thumbUrl) poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
 }
 function setError(shell, message) {
-	shell.innerHTML = "<div class=\"error-label\">" + message + "</div>";
+	shell.replaceChildren();
+	const error = document.createElement("div");
+	error.className = "error-label";
+	error.textContent = message;
+	shell.append(error);
 }
 //#endregion
 //#region src/scripts/videoPoster/utils.js
@@ -120,6 +123,21 @@ function formatDuration(seconds) {
 	if (hours > 0) return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 	return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
+async function fetchJsonWithTimeout(url, timeoutMs = 2500) {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(function() {
+		controller.abort();
+	}, timeoutMs);
+	try {
+		const response = await fetch(url, { signal: controller.signal });
+		if (!response.ok) return null;
+		return await response.json();
+	} catch {
+		return null;
+	} finally {
+		clearTimeout(timeoutId);
+	}
+}
 function titleFromUrl(url) {
 	try {
 		const parsed = new URL(url);
@@ -130,7 +148,7 @@ function titleFromUrl(url) {
 }
 //#endregion
 //#region src/scripts/videoPoster/providers/html5.js
-function setupHtml5(shell, videoUrl) {
+function initHtml5(shell, videoUrl) {
 	if (!videoUrl) {
 		setError(shell, "Missing HTML5 video URL");
 		return;
@@ -170,70 +188,60 @@ var ALLOW = {
 };
 //#endregion
 //#region src/scripts/videoPoster/dom.js
-function createIframe(title, allow, src) {
+function createIframe(title, allow) {
 	const iframe = document.createElement("iframe");
 	iframe.title = title;
 	iframe.loading = "lazy";
 	iframe.allow = allow;
 	iframe.allowFullscreen = true;
-	iframe.src = src;
+	iframe.referrerPolicy = "strict-origin-when-cross-origin";
+	iframe.sandbox = "allow-scripts allow-same-origin allow-presentation allow-popups";
 	return iframe;
 }
 //#endregion
 //#region src/scripts/videoPoster/providers/vimeo.js
-function createVimeoUrl(id) {
-	return `https://player.vimeo.com/video/${id}?${new URLSearchParams({
-		autoplay: "0",
-		muted: "0",
-		title: "0",
-		byline: "0",
-		portrait: "0",
-		badge: "0",
-		dnt: "1"
-	}).toString()}`;
-}
-function createVimeoPlayUrl(id) {
-	return `https://player.vimeo.com/video/${id}?${new URLSearchParams({
-		autoplay: "1",
-		muted: "0",
-		title: "0",
-		byline: "0",
-		portrait: "0",
-		badge: "0",
-		dnt: "1"
-	}).toString()}`;
-}
-function getVimeoId(url) {
-	try {
-		const match = new URL(url).pathname.match(/\/(\d+)/);
-		return match ? match[1] : null;
-	} catch {
-		return null;
+function initVimeo(shell, videoUrl) {
+	function getVimeoId(url) {
+		try {
+			const parsed = new URL(url);
+			const host = parsed.hostname.replace(/^www\./, "");
+			if (host !== "vimeo.com" && host !== "player.vimeo.com") return null;
+			const match = parsed.pathname.match(/\/(\d+)/);
+			return match ? match[1] : null;
+		} catch {
+			return null;
+		}
 	}
-}
-function setupVimeo(shell, videoUrl) {
+	function createVimeoPlayUrl(id) {
+		return `https://player.vimeo.com/video/${id}?${new URLSearchParams({
+			autoplay: "1",
+			muted: "0",
+			title: "0",
+			byline: "0",
+			portrait: "0",
+			badge: "0",
+			dnt: "1"
+		}).toString()}`;
+	}
 	const id = getVimeoId(videoUrl);
 	if (!id) {
 		setError(shell, "Invalid Vimeo URL");
 		return;
 	}
 	const titleFallback = "Vimeo Video";
-	const iframe = createIframe(titleFallback, ALLOW.vimeo, createVimeoUrl(id));
+	const iframe = createIframe(titleFallback, ALLOW.vimeo);
 	const poster = createPoster(titleFallback, "--:--", "", getPosterMetaSettings(shell));
-	let started = false;
 	poster.addEventListener("click", function() {
-		if (started) return;
-		started = true;
 		poster.classList.add("hidden");
 		iframe.src = createVimeoPlayUrl(id);
 		iframe.focus();
-	});
+	}, { once: true });
 	shell.append(iframe, poster);
-	fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`).then((r) => r.ok ? r.json() : null).then((data) => {
+	fetchJsonWithTimeout(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
 		if (data && data.thumbnail_url) updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
 		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
-	}).catch(() => {});
+	});
 	updatePosterMeta(poster, {
 		title: titleFallback,
 		time: "--:--"
@@ -241,32 +249,32 @@ function setupVimeo(shell, videoUrl) {
 }
 //#endregion
 //#region src/scripts/videoPoster/providers/youtube.js
-function createYouTubeUrl(id, autoplay) {
-	return `https://www.youtube.com/embed/${id}?${new URLSearchParams({
-		autoplay: autoplay ? "1" : "0",
-		mute: "0",
-		rel: "0",
-		iv_load_policy: "3",
-		controls: "1",
-		fs: "1",
-		modestbranding: "1",
-		playsinline: "1",
-		enablejsapi: "1"
-	}).toString()}`;
-}
-function getYouTubeId(url) {
-	try {
-		const parsed = new URL(url);
-		const host = parsed.hostname.replace(/^www\./, "");
-		if (host === "youtu.be") return parsed.pathname.slice(1);
-		if ((host === "youtube.com" || host === "m.youtube.com") && parsed.searchParams.has("v")) return parsed.searchParams.get("v");
-		const match = parsed.pathname.match(/\/(embed|shorts|live)\/([^/?#]+)/);
-		return match ? match[2] : null;
-	} catch {
-		return null;
+function initYouTube(shell, videoUrl) {
+	function getYouTubeId(url) {
+		try {
+			const parsed = new URL(url);
+			const host = parsed.hostname.replace(/^www\./, "");
+			if (host === "youtu.be") return parsed.pathname.slice(1);
+			if ((host === "youtube.com" || host === "m.youtube.com") && parsed.searchParams.has("v")) return parsed.searchParams.get("v");
+			const match = parsed.pathname.match(/\/(embed|shorts|live)\/([^/?#]+)/);
+			return match ? match[2] : null;
+		} catch {
+			return null;
+		}
 	}
-}
-function setupYouTube(shell, videoUrl) {
+	function createYouTubeUrl(id, autoplay) {
+		return `https://www.youtube.com/embed/${id}?${new URLSearchParams({
+			autoplay: autoplay ? "1" : "0",
+			mute: "0",
+			rel: "0",
+			iv_load_policy: "3",
+			controls: "1",
+			fs: "1",
+			modestbranding: "1",
+			playsinline: "1",
+			enablejsapi: "1"
+		}).toString()}`;
+	}
 	const id = getYouTubeId(videoUrl);
 	if (!id) {
 		setError(shell, "Invalid YouTube URL");
@@ -274,20 +282,17 @@ function setupYouTube(shell, videoUrl) {
 	}
 	const titleFallback = "YouTube Video";
 	const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
-	const iframe = createIframe(titleFallback, ALLOW.youtube, createYouTubeUrl(id, false));
+	const iframe = createIframe(titleFallback, ALLOW.youtube);
 	const poster = createPoster(titleFallback, "--:--", thumbUrl, getPosterMetaSettings(shell));
-	let started = false;
 	poster.addEventListener("click", function() {
-		if (started) return;
-		started = true;
 		poster.classList.add("hidden");
 		iframe.src = createYouTubeUrl(id, true);
 		iframe.focus();
-	});
+	}, { once: true });
 	shell.append(iframe, poster);
-	fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`).then((r) => r.ok ? r.json() : null).then((data) => {
+	fetchJsonWithTimeout(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
-	}).catch(() => {});
+	});
 	updatePosterMeta(poster, {
 		title: titleFallback,
 		time: "--:--",
@@ -300,15 +305,15 @@ function initVideoShell(shell) {
 	const type = shell.dataset.videoType;
 	const videoUrl = shell.dataset.videoUrl;
 	if (type === "youtube") {
-		setupYouTube(shell, videoUrl);
+		initYouTube(shell, videoUrl);
 		return;
 	}
 	if (type === "vimeo") {
-		setupVimeo(shell, videoUrl);
+		initVimeo(shell, videoUrl);
 		return;
 	}
 	if (type === "html5") {
-		setupHtml5(shell, videoUrl);
+		initHtml5(shell, videoUrl);
 		return;
 	}
 	setError(shell, "Unknown video type");
