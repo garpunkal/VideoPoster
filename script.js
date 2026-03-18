@@ -74,9 +74,11 @@ function createPoster(initialTitle, initialTime, posterUrl) {
 	return poster;
 }
 function updatePosterMeta(poster, payload) {
+	console.log("updatePosterMeta called", payload);
 	if (payload.title) {
 		const title = poster.querySelector(".title-badge");
 		const sr = poster.querySelector(".sr-only");
+		console.log("Setting title:", payload.title, title, sr);
 		title.textContent = payload.title;
 		sr.textContent = "Play " + payload.title;
 		poster.setAttribute("aria-label", "Play " + payload.title);
@@ -84,10 +86,15 @@ function updatePosterMeta(poster, payload) {
 	}
 	if (payload.time) {
 		const time = poster.querySelector(".time-badge");
+		console.log("Setting time:", payload.time, time);
 		time.textContent = payload.time;
-		time.classList.remove("hidden");
+		if (payload.time === "--:--") time.classList.add("hidden");
+		else time.classList.remove("hidden");
 	}
-	if (payload.thumbUrl) poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
+	if (payload.thumbUrl) {
+		console.log("Setting thumbUrl:", payload.thumbUrl);
+		poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
+	}
 }
 function setError(shell, message) {
 	shell.innerHTML = "<div class=\"error-label\">" + message + "</div>";
@@ -126,15 +133,6 @@ function createVimeoPlayUrl(id) {
 		badge: "0",
 		dnt: "1"
 	}).toString()}`;
-}
-function guessPosterFromVideoUrl(url) {
-	if (!url) return "";
-	if (url.includes("w3schools.com/html/mov_bbb.mp4")) return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg";
-	if (url.includes("gtv-videos-bucket/sample/")) {
-		const baseName = (url.split("/").pop() || "").replace(/\.[a-z0-9]+$/i, "");
-		if (baseName) return `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/${encodeURIComponent(baseName)}.jpg`;
-	}
-	return "https://images.unsplash.com/photo-1497015289639-54688650d173?auto=format&fit=crop&w=1280&q=80";
 }
 function formatDuration(seconds) {
 	if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
@@ -178,51 +176,27 @@ function setupHtml5(shell, videoUrl) {
 		setError(shell, "Missing HTML5 video URL");
 		return;
 	}
-	const candidateUrls = [videoUrl, ...["https://www.w3schools.com/html/mov_bbb.mp4", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"]].filter(function(url, index, arr) {
-		return Boolean(url) && arr.indexOf(url) === index;
-	});
-	let activeUrlIndex = 0;
-	let hasStarted = false;
 	const video = document.createElement("video");
 	video.controls = true;
 	video.preload = "metadata";
 	video.playsInline = true;
-	const initialPosterUrl = guessPosterFromVideoUrl(candidateUrls[activeUrlIndex]);
-	if (initialPosterUrl) video.poster = initialPosterUrl;
-	const poster = createPoster(titleFromUrl(candidateUrls[activeUrlIndex]), "--:--", initialPosterUrl);
-	function applySource(index) {
-		activeUrlIndex = index;
-		const src = candidateUrls[activeUrlIndex];
-		const guessedPoster = guessPosterFromVideoUrl(src);
-		if (guessedPoster) {
-			video.poster = guessedPoster;
-			updatePosterMeta(poster, { thumbUrl: guessedPoster });
-		}
-		video.src = src;
-	}
+	video.src = videoUrl;
+	const poster = createPoster("", "--:--", shell.getAttribute("data-poster-url") || "");
 	video.addEventListener("loadedmetadata", function() {
 		updatePosterMeta(poster, {
-			title: titleFromUrl(video.currentSrc || candidateUrls[activeUrlIndex]),
+			title: titleFromUrl(videoUrl),
 			time: formatDuration(video.duration)
 		});
 	});
 	video.addEventListener("error", function() {
-		if (activeUrlIndex < candidateUrls.length - 1) {
-			poster.classList.remove("hidden");
-			applySource(activeUrlIndex + 1);
-			if (hasStarted) attemptPlay();
-			return;
-		}
 		setError(shell, "HTML5 video failed to load. Please check the video URL or try another file.");
 	});
 	async function attemptPlay() {
-		const desiredSrc = candidateUrls[activeUrlIndex];
-		if (video.src !== desiredSrc) video.load();
+		if (video.src !== videoUrl) video.load();
 		video.muted = false;
 		await video.play();
 	}
 	poster.addEventListener("click", async function() {
-		hasStarted = true;
 		poster.classList.add("hidden");
 		try {
 			await attemptPlay();
@@ -230,7 +204,6 @@ function setupHtml5(shell, videoUrl) {
 			poster.classList.remove("hidden");
 		}
 	});
-	applySource(activeUrlIndex);
 	shell.append(video, poster);
 }
 function setupYouTube(shell, videoUrl) {
@@ -253,6 +226,12 @@ function setupYouTube(shell, videoUrl) {
 		iframe.focus();
 	});
 	shell.append(iframe, poster);
+	fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`).then((r) => r.ok ? r.json() : null).then((data) => {
+		if (data && data.title) updatePosterMeta(poster, { title: data.title });
+	});
+	fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`).then((r) => r.ok ? r.json() : null).then((data) => {
+		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
+	});
 	updatePosterMeta(poster, {
 		title: titleFallback,
 		time: "--:--",
@@ -279,6 +258,10 @@ function setupVimeo(shell, videoUrl) {
 		iframe.focus();
 	});
 	shell.append(iframe, poster);
+	fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`).then((r) => r.ok ? r.json() : null).then((data) => {
+		if (data && data.title) updatePosterMeta(poster, { title: data.title });
+		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
+	});
 	updatePosterMeta(poster, {
 		title: titleFallback,
 		time: "--:--",

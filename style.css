@@ -115,6 +115,11 @@ body {
   letter-spacing: 0.01em;
 }
 
+.video-poster-block .title-badge.hidden,
+.video-poster-block .time-badge.hidden {
+  display: none;
+}
+
 .video-poster-block .poster-content {
   position: absolute;
   left: 14px;
