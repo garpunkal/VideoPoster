@@ -8,6 +8,8 @@ A small Vite demo that renders poster-first video players with click-to-play beh
 
 The UI is built from `data-` attributes in `src/index.html`. Each `.video-shell` starts as a poster overlay and swaps to an active player after user interaction.
 
+The demo currently renders provider sections (YouTube, Vimeo, HTML5) with two videos per section.
+
 ## Tech Stack
 
 - Vite 8
@@ -79,12 +81,30 @@ Define one container per video:
     data-video-type="youtube|vimeo|html5"
     data-video-url="https://..."
     data-poster-url="https://..."
+    data-show-title="true|false"
+    data-show-time="true|false"
 ></div>
 ```
 
 - `data-video-type` (required): `youtube`, `vimeo`, or `html5`
 - `data-video-url` (required): source video URL
 - `data-poster-url` (optional): custom poster image (mainly useful for HTML5)
+- `data-show-title` (optional): controls title badge visibility; default is `true`
+- `data-show-time` (optional): controls duration/time badge visibility; default is `true`
+
+Boolean parsing for `data-show-title` and `data-show-time` treats the following values as false: `false`, `0`, `no`, `off` (case-insensitive).
+
+Example that hides both title and time:
+
+```html
+<div
+    class="video-shell"
+    data-video-type="html5"
+    data-video-url="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+    data-show-title="false"
+    data-show-time="false"
+></div>
+```
 
 ## Deploy to GitHub Pages
 
