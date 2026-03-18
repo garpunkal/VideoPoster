@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
-import { createHtmlPlugin } from 'vite-plugin-html'
 
 export default defineConfig({
   build: {
+    minify: false,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -18,13 +18,5 @@ export default defineConfig({
     emptyOutDir: true,
   },
   plugins: [
-    createHtmlPlugin({
-      minify: true,
-      inject: {
-        data: {
-          injectScript: `<script src=\"./codepen.js\"></script>`
-        }
-      }
-    })
   ]
 })

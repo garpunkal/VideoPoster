@@ -114,6 +114,9 @@ function createVimeoPlayUrl(id) {
 
 function guessPosterFromVideoUrl(url) {
   if (!url) return "";
+  if (url.includes("w3schools.com/html/mov_bbb.mp4")) {
+    return "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg";
+  }
   if (url.includes("gtv-videos-bucket/sample/")) {
     const fileName = url.split("/").pop() || "";
     const baseName = fileName.replace(/\.[a-z0-9]+$/i, "");
@@ -121,7 +124,7 @@ function guessPosterFromVideoUrl(url) {
       return `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/${encodeURIComponent(baseName)}.jpg`;
     }
   }
-  return "";
+  return "https://images.unsplash.com/photo-1497015289639-54688650d173?auto=format&fit=crop&w=1280&q=80";
 }
 
 function formatDuration(seconds) {
@@ -223,6 +226,7 @@ function setupHtml5(shell, videoUrl) {
     return Boolean(url) && arr.indexOf(url) === index;
   });
   let activeUrlIndex = 0;
+  let hasStarted = false;
 
   const video = document.createElement("video");
   video.controls = true;
@@ -245,7 +249,6 @@ function setupHtml5(shell, videoUrl) {
       updatePosterMeta(poster, { thumbUrl: guessedPoster });
     }
     video.src = src;
-    video.load();
   }
 
   video.addEventListener("loadedmetadata", function () {
@@ -260,16 +263,28 @@ function setupHtml5(shell, videoUrl) {
     if (activeUrlIndex < candidateUrls.length - 1) {
       poster.classList.remove("hidden");
       applySource(activeUrlIndex + 1);
+      if (hasStarted) {
+        void attemptPlay();
+      }
       return;
     }
     setError(shell, "HTML5 video failed to load. Please check the video URL or try another file.");
   });
 
+  async function attemptPlay() {
+    const desiredSrc = candidateUrls[activeUrlIndex];
+    if (video.src !== desiredSrc) {
+      video.load();
+    }
+    video.muted = false;
+    await video.play();
+  }
+
   poster.addEventListener("click", async function () {
+    hasStarted = true;
     poster.classList.add("hidden");
     try {
-      video.muted = false;
-      await video.play();
+      await attemptPlay();
     } catch {
       poster.classList.remove("hidden");
     }
