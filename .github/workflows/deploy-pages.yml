@@ -3,9 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
       - deploy
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
   contents: read
@@ -32,8 +34,6 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: src/package-lock.json
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Install dependencies
         run: npm ci
