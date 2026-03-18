@@ -43,10 +43,31 @@ function createIframe(title, allow, src) {
 	iframe.src = src;
 	return iframe;
 }
-function createPoster(initialTitle, initialTime, posterUrl) {
+function parseBoolDataAttr(value, defaultValue = true) {
+	if (value == null) return defaultValue;
+	const normalized = String(value).trim().toLowerCase();
+	return ![
+		"false",
+		"0",
+		"no",
+		"off"
+	].includes(normalized);
+}
+function getPosterMetaSettings(shell) {
+	return {
+		showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), true),
+		showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), true)
+	};
+}
+function createPoster(initialTitle, initialTime, posterUrl, metaSettings = {
+	showTitle: true,
+	showTime: true
+}) {
 	const poster = document.createElement("button");
 	poster.type = "button";
 	poster.className = "poster";
+	poster.dataset.showTitle = metaSettings.showTitle ? "true" : "false";
+	poster.dataset.showTime = metaSettings.showTime ? "true" : "false";
 	poster.setAttribute("aria-label", "Play " + initialTitle);
 	const bgValue = posterUrl ? `url('${posterUrl}')` : "linear-gradient(135deg, #2a2a2a, #121212)";
 	poster.style.setProperty("--poster-bg", bgValue);
@@ -58,6 +79,8 @@ function createPoster(initialTitle, initialTime, posterUrl) {
 	const time = document.createElement("span");
 	time.className = "time-badge hidden";
 	time.textContent = initialTime;
+	if (!metaSettings.showTitle) title.classList.add("hidden");
+	if (!metaSettings.showTime) time.classList.add("hidden");
 	meta.append(title, time);
 	const playTile = document.createElement("span");
 	playTile.className = "play-badge";
@@ -74,27 +97,27 @@ function createPoster(initialTitle, initialTime, posterUrl) {
 	return poster;
 }
 function updatePosterMeta(poster, payload) {
-	console.log("updatePosterMeta called", payload);
+	const showTitle = poster.dataset.showTitle !== "false";
+	const showTime = poster.dataset.showTime !== "false";
 	if (payload.title) {
 		const title = poster.querySelector(".title-badge");
 		const sr = poster.querySelector(".sr-only");
-		console.log("Setting title:", payload.title, title, sr);
-		title.textContent = payload.title;
-		sr.textContent = "Play " + payload.title;
+		if (title) {
+			title.textContent = payload.title;
+			if (showTitle) title.classList.remove("hidden");
+		}
+		if (sr) sr.textContent = "Play " + payload.title;
 		poster.setAttribute("aria-label", "Play " + payload.title);
-		title.classList.remove("hidden");
 	}
 	if (payload.time) {
 		const time = poster.querySelector(".time-badge");
-		console.log("Setting time:", payload.time, time);
-		time.textContent = payload.time;
-		if (payload.time === "--:--") time.classList.add("hidden");
-		else time.classList.remove("hidden");
+		if (time) {
+			time.textContent = payload.time;
+			if (!showTime || payload.time === "--:--") time.classList.add("hidden");
+			else time.classList.remove("hidden");
+		}
 	}
-	if (payload.thumbUrl) {
-		console.log("Setting thumbUrl:", payload.thumbUrl);
-		poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
-	}
+	if (payload.thumbUrl) poster.style.setProperty("--poster-bg", `url('${payload.thumbUrl}')`);
 }
 function setError(shell, message) {
 	shell.innerHTML = "<div class=\"error-label\">" + message + "</div>";
@@ -181,7 +204,7 @@ function setupHtml5(shell, videoUrl) {
 	video.preload = "metadata";
 	video.playsInline = true;
 	video.src = videoUrl;
-	const poster = createPoster("", "--:--", shell.getAttribute("data-poster-url") || "");
+	const poster = createPoster("", "--:--", shell.getAttribute("data-poster-url") || "", getPosterMetaSettings(shell));
 	video.addEventListener("loadedmetadata", function() {
 		updatePosterMeta(poster, {
 			title: titleFromUrl(videoUrl),
@@ -216,7 +239,7 @@ function setupYouTube(shell, videoUrl) {
 	const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
 	const previewUrl = createYouTubeUrl(id, false);
 	const iframe = createIframe(titleFallback, ALLOW.youtube, previewUrl);
-	const poster = createPoster(titleFallback, "--:--", thumbUrl);
+	const poster = createPoster(titleFallback, "--:--", thumbUrl, getPosterMetaSettings(shell));
 	let started = false;
 	poster.addEventListener("click", function() {
 		if (started) return;
@@ -228,9 +251,6 @@ function setupYouTube(shell, videoUrl) {
 	shell.append(iframe, poster);
 	fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`).then((r) => r.ok ? r.json() : null).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
-	});
-	fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`).then((r) => r.ok ? r.json() : null).then((data) => {
-		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
 	});
 	updatePosterMeta(poster, {
 		title: titleFallback,
@@ -248,7 +268,7 @@ function setupVimeo(shell, videoUrl) {
 	const thumbUrl = "https://vumbnail.com/" + id + ".jpg";
 	const previewUrl = createVimeoUrl(id);
 	const iframe = createIframe(titleFallback, ALLOW.vimeo, previewUrl);
-	const poster = createPoster(titleFallback, "--:--", thumbUrl);
+	const poster = createPoster(titleFallback, "--:--", thumbUrl, getPosterMetaSettings(shell));
 	let started = false;
 	poster.addEventListener("click", function() {
 		if (started) return;
