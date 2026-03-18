@@ -50,17 +50,17 @@ This repository uses a nested app folder:
 
 Run all npm commands from the app directory (`./src`).
 
-    data-video-type="youtube|vimeo|html5"
-    data-video-url="https://..."
-    data-poster-url="https://..."
-    data-show-title="true|false"
-    data-show-time="true|false"
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
 - npm
 
 ### Install
 
 ```bash
-- `data-poster-url` (optional): custom poster image for all providers; when present, it overrides provider thumbnail fallback
+cd src
 npm install
 ```
 
@@ -133,10 +133,10 @@ Core initialization flow:
 
 - `initAllVideoShells(root = document)` scans for `.video-shell` nodes.
 - `initVideoShell(shell)` routes by `data-video-type`.
-- Provider entry points are:
-    - `initYouTube(shell, videoUrl)`
-    - `initVimeo(shell, videoUrl)`
-    - `initHtml5(shell, videoUrl)`
+- Provider entry points:
+  - `initYouTube(shell, videoUrl)`
+  - `initVimeo(shell, videoUrl)`
+  - `initHtml5(shell, videoUrl)`
 
 Poster rendering and updates are handled in `poster.js`, while shared helpers (duration formatting, URL title parsing, timed metadata fetch) live in `utils.js`.
 
