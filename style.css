@@ -20,9 +20,19 @@ body {
 }
 
 .video-poster-block .video-wrap {
-  width: min(640px, 94vw);
-  margin: 0 auto;
+  width: min(1240px, 94vw);
   display: grid;
+  gap: 22px;
+}
+
+.video-poster-block .video-group {
+  display: grid;
+  gap: 12px;
+}
+
+.video-poster-block .video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -34,6 +44,22 @@ body {
   border-radius: 16px !important;
   overflow: hidden !important;
   background: #2b2f36;
+}
+
+@media (max-width: 1024px) {
+  .video-poster-block .video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .video-poster-block .video-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-poster-block .video-shell {
+    min-height: 180px;
+  }
 }
 
 .video-poster-block .video-shell iframe,
