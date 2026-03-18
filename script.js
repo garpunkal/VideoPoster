@@ -29,7 +29,7 @@
 	}
 })();
 //#endregion
-//#region src/videoPoster/poster.js
+//#region src/scripts/videoPoster/poster.js
 function parseBoolDataAttr(value, defaultValue = true) {
 	if (value == null) return defaultValue;
 	const normalized = String(value).trim().toLowerCase();
@@ -110,7 +110,7 @@ function setError(shell, message) {
 	shell.innerHTML = "<div class=\"error-label\">" + message + "</div>";
 }
 //#endregion
-//#region src/videoPoster/utils.js
+//#region src/scripts/videoPoster/utils.js
 function formatDuration(seconds) {
 	if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
 	const total = Math.floor(seconds);
@@ -129,7 +129,7 @@ function titleFromUrl(url) {
 	}
 }
 //#endregion
-//#region src/videoPoster/providers/html5.js
+//#region src/scripts/videoPoster/providers/html5.js
 function setupHtml5(shell, videoUrl) {
 	if (!videoUrl) {
 		setError(shell, "Missing HTML5 video URL");
@@ -163,13 +163,13 @@ function setupHtml5(shell, videoUrl) {
 	shell.append(video, poster);
 }
 //#endregion
-//#region src/videoPoster/constants.js
+//#region src/scripts/videoPoster/constants.js
 var ALLOW = {
 	youtube: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
 	vimeo: "autoplay; fullscreen; picture-in-picture"
 };
 //#endregion
-//#region src/videoPoster/dom.js
+//#region src/scripts/videoPoster/dom.js
 function createIframe(title, allow, src) {
 	const iframe = document.createElement("iframe");
 	iframe.title = title;
@@ -180,7 +180,7 @@ function createIframe(title, allow, src) {
 	return iframe;
 }
 //#endregion
-//#region src/videoPoster/providers/vimeo.js
+//#region src/scripts/videoPoster/providers/vimeo.js
 function createVimeoUrl(id) {
 	return `https://player.vimeo.com/video/${id}?${new URLSearchParams({
 		autoplay: "0",
@@ -241,7 +241,7 @@ function setupVimeo(shell, videoUrl) {
 	});
 }
 //#endregion
-//#region src/videoPoster/providers/youtube.js
+//#region src/scripts/videoPoster/providers/youtube.js
 function createYouTubeUrl(id, autoplay) {
 	return `https://www.youtube.com/embed/${id}?${new URLSearchParams({
 		autoplay: autoplay ? "1" : "0",
@@ -296,7 +296,7 @@ function setupYouTube(shell, videoUrl) {
 	});
 }
 //#endregion
-//#region src/videoPoster.js
+//#region src/scripts/videoPoster/index.js
 function initVideoShell(shell) {
 	const type = shell.dataset.videoType;
 	const videoUrl = shell.dataset.videoUrl;
@@ -318,6 +318,6 @@ function initAllVideoShells(root = document) {
 	root.querySelectorAll(".video-shell").forEach(initVideoShell);
 }
 //#endregion
-//#region src/main.js
+//#region src/scripts/main.js
 initAllVideoShells();
 //#endregion
