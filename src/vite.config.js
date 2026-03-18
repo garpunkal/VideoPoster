@@ -13,7 +13,6 @@ export default defineConfig(({ command }) => ({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
-        // Output to dist/codepen.html for clarity
         entryFileNames: 'script.js',
         assetFileNames: 'style.[ext]',
       },
