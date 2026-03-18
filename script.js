@@ -218,9 +218,8 @@ function setupVimeo(shell, videoUrl) {
 		return;
 	}
 	const titleFallback = "Vimeo Video";
-	const thumbUrl = "https://vumbnail.com/" + id + ".jpg";
 	const iframe = createIframe(titleFallback, ALLOW.vimeo, createVimeoUrl(id));
-	const poster = createPoster(titleFallback, "--:--", thumbUrl, getPosterMetaSettings(shell));
+	const poster = createPoster(titleFallback, "--:--", "", getPosterMetaSettings(shell));
 	let started = false;
 	poster.addEventListener("click", function() {
 		if (started) return;
@@ -232,12 +231,12 @@ function setupVimeo(shell, videoUrl) {
 	shell.append(iframe, poster);
 	fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`).then((r) => r.ok ? r.json() : null).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
+		if (data && data.thumbnail_url) updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
 		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
 	}).catch(() => {});
 	updatePosterMeta(poster, {
 		title: titleFallback,
-		time: "--:--",
-		thumbUrl
+		time: "--:--"
 	});
 }
 //#endregion
