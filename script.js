@@ -229,8 +229,9 @@ function initVimeo(shell, videoUrl) {
 		return;
 	}
 	const titleFallback = "Vimeo Video";
+	const customPosterUrl = shell.getAttribute("data-poster-url") || "";
 	const iframe = createIframe(titleFallback, ALLOW.vimeo);
-	const poster = createPoster(titleFallback, "--:--", "", getPosterMetaSettings(shell));
+	const poster = createPoster(titleFallback, "--:--", customPosterUrl, getPosterMetaSettings(shell));
 	poster.addEventListener("click", function() {
 		poster.classList.add("hidden");
 		iframe.src = createVimeoPlayUrl(id);
@@ -239,7 +240,7 @@ function initVimeo(shell, videoUrl) {
 	shell.append(iframe, poster);
 	fetchJsonWithTimeout(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
-		if (data && data.thumbnail_url) updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
+		if (!customPosterUrl && data && data.thumbnail_url) updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
 		if (data && data.duration) updatePosterMeta(poster, { time: formatDuration(data.duration) });
 	});
 	updatePosterMeta(poster, {
@@ -281,9 +282,11 @@ function initYouTube(shell, videoUrl) {
 		return;
 	}
 	const titleFallback = "YouTube Video";
+	const customPosterUrl = shell.getAttribute("data-poster-url") || "";
 	const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
+	const initialPosterUrl = customPosterUrl || thumbUrl;
 	const iframe = createIframe(titleFallback, ALLOW.youtube);
-	const poster = createPoster(titleFallback, "--:--", thumbUrl, getPosterMetaSettings(shell));
+	const poster = createPoster(titleFallback, "--:--", initialPosterUrl, getPosterMetaSettings(shell));
 	poster.addEventListener("click", function() {
 		poster.classList.add("hidden");
 		iframe.src = createYouTubeUrl(id, true);
@@ -293,11 +296,12 @@ function initYouTube(shell, videoUrl) {
 	fetchJsonWithTimeout(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`).then((data) => {
 		if (data && data.title) updatePosterMeta(poster, { title: data.title });
 	});
-	updatePosterMeta(poster, {
+	const posterMeta = {
 		title: titleFallback,
-		time: "--:--",
-		thumbUrl
-	});
+		time: "--:--"
+	};
+	if (!customPosterUrl) posterMeta.thumbUrl = thumbUrl;
+	updatePosterMeta(poster, posterMeta);
 }
 //#endregion
 //#region src/scripts/videoPoster/index.js
