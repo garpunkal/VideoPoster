@@ -6,8 +6,8 @@ export function getPosterMetaSettings(shell) {
   }
 
   return {
-    showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), true),
-    showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), true)
+    showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), false),
+    showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), false)
   };
 }
 

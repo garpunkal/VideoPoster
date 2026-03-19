@@ -6,7 +6,7 @@ A small Vite demo that renders poster-first video players with click-to-play beh
 - Vimeo
 - HTML5 video
 
-The UI is built from `data-` attributes in `src/index.html`. Each `.video-shell` starts as a poster overlay and swaps to an active player after user interaction.
+The UI is built from `data-` attributes in `src/index.html`. Each `.video-with-poster` starts as a poster overlay and swaps to an active player after user interaction.
 
 The demo currently renders provider sections (YouTube, Vimeo, HTML5) with two videos per section.
 
@@ -131,7 +131,7 @@ Example that hides both title and time:
 
 Core initialization flow:
 
-- `initAllVideoShells(root = document)` scans for `.video-shell` nodes.
+- `initAllVideoShells(root = document)` scans for `.video-with-poster` nodes.
 - `initVideoShell(shell)` routes by `data-video-type`.
 - Provider entry points:
   - `initYouTube(shell, videoUrl)`

@@ -13,8 +13,8 @@ export default defineConfig(({ command }) => ({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
-        entryFileNames: 'script.js',
-        assetFileNames: 'style.[ext]',
+        entryFileNames: 'videoposter.js',
+        assetFileNames: 'videoposter.[ext]',
       },
     },
     outDir: 'dist',
