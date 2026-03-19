@@ -42,8 +42,8 @@ function getPosterMetaSettings(shell) {
 		].includes(normalized);
 	}
 	return {
-		showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), true),
-		showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), true)
+		showTitle: parseBoolDataAttr(shell.getAttribute("data-show-title"), false),
+		showTime: parseBoolDataAttr(shell.getAttribute("data-show-time"), false)
 	};
 }
 function createPoster(initialTitle, initialTime, posterUrl, metaSettings = {
@@ -305,9 +305,17 @@ function initYouTube(shell, videoUrl) {
 }
 //#endregion
 //#region src/scripts/videoPoster/index.js
+function inferType(url) {
+	try {
+		const { hostname } = new URL(url);
+		if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return "youtube";
+		if (hostname.includes("vimeo.com")) return "vimeo";
+	} catch {}
+	return "html5";
+}
 function initVideoShell(shell) {
-	const type = shell.dataset.videoType;
 	const videoUrl = shell.dataset.videoUrl;
+	const type = shell.dataset.videoType || inferType(videoUrl);
 	if (type === "youtube") {
 		initYouTube(shell, videoUrl);
 		return;
@@ -323,7 +331,7 @@ function initVideoShell(shell) {
 	setError(shell, "Unknown video type");
 }
 function initAllVideoShells(root = document) {
-	root.querySelectorAll(".video-shell").forEach(initVideoShell);
+	root.querySelectorAll("[data-video-with-poster]").forEach(initVideoShell);
 }
 //#endregion
 //#region src/scripts/main.js

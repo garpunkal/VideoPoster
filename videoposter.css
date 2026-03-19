@@ -4,39 +4,30 @@ body {
   background: #2b2f36;
 }
 
-.video-poster-block * {
+.vp-container * {
   box-sizing: border-box;
 }
 
-.video-poster-block {
+.vp-container {
   font-family: "Space Grotesk", sans-serif;
   background: #2b2f36;
   padding: 20px 0 28px;
+  width: min(600px, 94vw);
+  margin-inline: auto;
+  display: grid;
+  gap: 6px;
 }
 
-.video-poster-block h2 {
-  margin: 8px 0 2px;
+.vp-container h2 {
+  margin: 22px 0 0;
   color: #d3d7de;
 }
 
-.video-poster-block .video-wrap {
-  width: min(1240px, 94vw);
-  display: grid;
-  gap: 22px;
+.vp-container h2:first-child {
+  margin-top: 0;
 }
 
-.video-poster-block .video-group {
-  display: grid;
-  gap: 12px;
-}
-
-.video-poster-block .video-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.video-poster-block .video-shell {
+.vp-container [data-video-with-poster] {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -46,24 +37,14 @@ body {
   background: #2b2f36;
 }
 
-@media (max-width: 1024px) {
-  .video-poster-block .video-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 700px) {
-  .video-poster-block .video-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .video-poster-block .video-shell {
+  .vp-container [data-video-with-poster] {
     min-height: 180px;
   }
 }
 
-.video-poster-block .video-shell iframe,
-.video-poster-block .video-shell video {
+.vp-container [data-video-with-poster] iframe,
+.vp-container [data-video-with-poster] video {
   width: 100%;
   height: 100%;
   border: 0;
@@ -73,7 +54,7 @@ body {
   background: transparent;
 }
 
-.video-poster-block .poster {
+.vp-container .poster {
   position: absolute;
   inset: 0;
   border: 0;
@@ -89,21 +70,21 @@ body {
   border-radius: 16px;
 }
 
-.video-poster-block .poster:hover {
+.vp-container .poster:hover {
   transform: scale(1.01);
 }
 
-.video-poster-block .poster:focus-visible {
+.vp-container .poster:focus-visible {
   outline: 3px solid #fff;
   outline-offset: -3px;
 }
 
-.video-poster-block .poster.hidden {
+.vp-container .poster.hidden {
   opacity: 0;
   pointer-events: none;
 }
 
-.video-poster-block .meta-stack {
+.vp-container .meta-stack {
   position: absolute;
   left: 12px;
   bottom: 12px;
@@ -113,7 +94,7 @@ body {
   max-width: calc(100% - 120px);
 }
 
-.video-poster-block .title-badge {
+.vp-container .title-badge {
   display: inline-block;
   max-width: 100%;
   width: fit-content;
@@ -129,7 +110,7 @@ body {
   text-overflow: ellipsis;
 }
 
-.video-poster-block .time-badge {
+.vp-container .time-badge {
   display: inline-block;
   width: fit-content;
   background: rgb(0 0 0 / 0.82);
@@ -141,19 +122,19 @@ body {
   letter-spacing: 0.01em;
 }
 
-.video-poster-block .title-badge.hidden,
-.video-poster-block .time-badge.hidden {
+.vp-container .title-badge.hidden,
+.vp-container .time-badge.hidden {
   display: none;
 }
 
-.video-poster-block .play-badge {
+.vp-container .play-badge {
   position: absolute;
   right: -8px;
   bottom: -8px;
   width: 100px;
   height: 100px;
   border-top-left-radius: 18px;
-  background: #e5b80b;
+  background: #1c2431;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,29 +145,29 @@ body {
   box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.1);
 }
 
-.video-poster-block .play-glyph {
+.vp-container .play-glyph {
   font-size: 40px;
   line-height: 1;
   margin-left: 4px;
 }
 
-.video-poster-block .poster .play-glyph {
+.vp-container .poster .play-glyph {
+  color: #e5b80b;
+}
+
+.vp-container .poster:hover .play-badge,
+.vp-container .poster:focus-visible .play-badge {
+  transform: scale(1.14);
+  background: #e5b80b;
   color: #1c2431;
 }
 
-.video-poster-block .poster:hover .play-badge,
-.video-poster-block .poster:focus-visible .play-badge {
-  transform: scale(1.14);
-  background: #1c2431;
-  color: #e5b80b;
+.vp-container .poster:hover .play-glyph,
+.vp-container .poster:focus-visible .play-glyph {
+  color: #1c2431;
 }
 
-.video-poster-block .poster:hover .play-glyph,
-.video-poster-block .poster:focus-visible .play-glyph {
-  color: #e5b80b;
-}
-
-.video-poster-block .sr-only {
+.vp-container .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -197,7 +178,7 @@ body {
   border: 0;
 }
 
-.video-poster-block .error-label {
+.vp-container .error-label {
   color: #fff;
   padding: 12px;
   font-size: 14px;
