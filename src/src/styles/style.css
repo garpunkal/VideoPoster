@@ -35,6 +35,13 @@
   background: #2b2f36;
 }
 
+.vp-container [data-video-with-poster][data-no-radius],
+.vp-container [data-video-with-poster][data-no-radius] iframe,
+.vp-container [data-video-with-poster][data-no-radius] video,
+.vp-container [data-video-with-poster][data-no-radius] .poster {
+  border-radius: 0;
+}
+
 @media (max-width: 700px) {
   .vp-container [data-video-with-poster] {
     min-height: 180px;
