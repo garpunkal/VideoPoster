@@ -16,15 +16,6 @@
   margin-block: 0;
 }
 
-.vp-container h2 {
-  margin: 22px 0 0;
-  color: #d3d7de;
-}
-
-.vp-container h2:first-child {
-  margin-top: 0;
-}
-
 .vp-container [data-video-with-poster] {
   position: relative;
   width: 100%;
