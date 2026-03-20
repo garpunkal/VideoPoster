@@ -6,11 +6,9 @@
 .vp-container {
   font-family: sans-serif;
 
-  padding: 20px 0 28px;
-  width: min(600px, 94vw);
+  margin: 20px 0 20px;
   margin-inline: auto;
   display: grid;
-  gap: 6px;
   height:auto;
 }
 
@@ -170,7 +168,7 @@
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
-  border: 0;
+  border: 0; 
 }
 
 .vp-container .error-label {
