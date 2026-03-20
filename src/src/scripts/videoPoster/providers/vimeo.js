@@ -39,7 +39,7 @@ export function initVimeo(shell, videoUrl) {
 
   const titleFallback = "Vimeo Video";
   const customPosterUrl = shell.getAttribute("data-poster-url") || "";
-  const iframe = createIframe(titleFallback, ALLOW.vimeo);
+  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.vimeo, shell.dataset.width, shell.dataset.height, shell.dataset.loading, shell.dataset.title);
   const metaSettings = getPosterMetaSettings(shell);
   const poster = createPoster(titleFallback, "--:--", customPosterUrl, metaSettings);
 

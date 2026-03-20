@@ -11,7 +11,12 @@ export function initHtml5(shell, videoUrl) {
   video.controls = true;
   video.preload = "metadata";
   video.playsInline = true;
+  video.setAttribute("frameborder", "0");
+  if (shell.dataset.title) video.title = shell.dataset.title;
+  video.loading = shell.dataset.loading || "lazy";
   video.src = videoUrl;
+  if (shell.dataset.width) video.width = shell.dataset.width;
+  if (shell.dataset.height) video.height = shell.dataset.height;
 
   const posterUrl = shell.getAttribute("data-poster-url") || "";
   const metaSettings = getPosterMetaSettings(shell);

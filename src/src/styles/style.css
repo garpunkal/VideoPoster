@@ -1,8 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap");
 
-body {
-  background: #2b2f36;
-}
 
 .vp-container * {
   box-sizing: border-box;
@@ -16,6 +13,7 @@ body {
   margin-inline: auto;
   display: grid;
   gap: 6px;
+  height:auto;
 }
 
 .vp-container h2 {
@@ -183,14 +181,3 @@ body {
   font-size: 14px;
 }
 
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
