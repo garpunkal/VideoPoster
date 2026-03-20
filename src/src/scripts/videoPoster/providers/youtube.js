@@ -45,7 +45,14 @@ export function initYouTube(shell, videoUrl) {
   const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
   const initialPosterUrl = customPosterUrl || thumbUrl;
   const allowFullscreen = shell.dataset.allowfullscreen == null || !["false", "0", "no", "off"].includes(String(shell.dataset.allowfullscreen).trim().toLowerCase());
-  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.youtube, shell.dataset.width, shell.dataset.height, shell.dataset.loading, shell.dataset.title, allowFullscreen);
+  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.youtube, {
+    width: shell.dataset.width,
+    height: shell.dataset.height,
+    loading: shell.dataset.loading,
+    customTitle: shell.dataset.title,
+    allowFullscreen,
+    mediaId: shell.dataset.mediaId
+  });
   const metaSettings = getPosterMetaSettings(shell);
   const poster = createPoster(titleFallback, "--:--", initialPosterUrl, metaSettings);
 

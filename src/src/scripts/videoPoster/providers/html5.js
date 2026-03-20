@@ -14,6 +14,7 @@ export function initHtml5(shell, videoUrl) {
   video.setAttribute("frameborder", "0");
   if (shell.dataset.title) video.title = shell.dataset.title;
   video.loading = shell.dataset.loading || "lazy";
+  if (shell.dataset.mediaId) video.id = shell.dataset.mediaId;
   video.src = videoUrl;
   if (shell.dataset.width) video.width = shell.dataset.width;
   if (shell.dataset.height) video.height = shell.dataset.height;

@@ -40,7 +40,14 @@ export function initVimeo(shell, videoUrl) {
   const titleFallback = "Vimeo Video";
   const customPosterUrl = shell.getAttribute("data-poster-url") || "";
   const allowFullscreen = shell.dataset.allowfullscreen == null || !["false", "0", "no", "off"].includes(String(shell.dataset.allowfullscreen).trim().toLowerCase());
-  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.vimeo, shell.dataset.width, shell.dataset.height, shell.dataset.loading, shell.dataset.title, allowFullscreen);
+  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.vimeo, {
+    width: shell.dataset.width,
+    height: shell.dataset.height,
+    loading: shell.dataset.loading,
+    customTitle: shell.dataset.title,
+    allowFullscreen,
+    mediaId: shell.dataset.mediaId
+  });
   const metaSettings = getPosterMetaSettings(shell);
   const poster = createPoster(titleFallback, "--:--", customPosterUrl, metaSettings);
 

@@ -1,4 +1,4 @@
-export function createIframe(title, allow, width, height, loading, customTitle, allowFullscreen) {
+export function createIframe(title, allow, { width, height, loading, customTitle, allowFullscreen, mediaId } = {}) {
   const iframe = document.createElement("iframe");
   iframe.title = customTitle || title;
   iframe.loading = loading || "lazy";
@@ -9,5 +9,6 @@ export function createIframe(title, allow, width, height, loading, customTitle, 
   iframe.setAttribute("frameborder", "0");
   if (width) iframe.width = width;
   if (height) iframe.height = height;
+  if (mediaId) iframe.id = mediaId;
   return iframe;
 }

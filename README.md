@@ -103,6 +103,7 @@ Define one container per video:
     data-video-type="youtube|vimeo|html5"
     data-poster-url="https://..."
     data-title="Custom player title"
+    data-media-id="my-player"
     data-width="640"
     data-height="360"
     data-loading="lazy|eager"
@@ -120,6 +121,7 @@ Define one container per video:
 | `data-video-type` | No | auto-detected | `youtube`, `vimeo`, or `html5`; inferred from URL when omitted |
 | `data-poster-url` | No | — | Custom poster image; overrides the provider thumbnail fallback |
 | `data-title` | No | Provider default | Overrides the `title` attribute on the `<iframe>` or `<video>` element |
+| `data-media-id` | No | — | Sets the `id` attribute on the `<iframe>` or `<video>` element |
 | `data-width` | No | — | Sets the `width` attribute on the `<iframe>` or `<video>` element |
 | `data-height` | No | — | Sets the `height` attribute on the `<iframe>` or `<video>` element |
 | `data-loading` | No | `lazy` | Sets the `loading` attribute; pass `eager` to disable lazy loading |
@@ -137,6 +139,7 @@ Example with all attributes:
     data-video-with-poster
     data-video-url="https://www.youtube.com/watch?v=k7dy1B6bOeM"
     data-title="My Video Title"
+    data-media-id="my-player"
     data-width="640"
     data-height="360"
     data-loading="eager"
