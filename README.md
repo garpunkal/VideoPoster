@@ -107,6 +107,7 @@ Define one container per video:
     data-height="360"
     data-loading="lazy|eager"
     data-allow="autoplay; fullscreen; picture-in-picture"
+    data-allowfullscreen="true|false"
     data-show-title="true|false"
     data-show-time="true|false"
 ></div>
@@ -123,10 +124,11 @@ Define one container per video:
 | `data-height` | No | — | Sets the `height` attribute on the `<iframe>` or `<video>` element |
 | `data-loading` | No | `lazy` | Sets the `loading` attribute; pass `eager` to disable lazy loading |
 | `data-allow` | No | Provider default | Overrides the `allow` attribute on the `<iframe>` (YouTube/Vimeo only) |
+| `data-allowfullscreen` | No | `true` | Controls the `allowFullscreen` property on the `<iframe>` (YouTube/Vimeo only) |
 | `data-show-title` | No | `true` | Controls title badge visibility |
 | `data-show-time` | No | `true` | Controls duration/time badge visibility |
 
-Boolean parsing for `data-show-title` and `data-show-time` treats the following values as false: `false`, `0`, `no`, `off` (case-insensitive).
+Boolean parsing for `data-show-title`, `data-show-time`, and `data-allowfullscreen` treats the following values as false: `false`, `0`, `no`, `off` (case-insensitive).
 
 Example with all attributes:
 
@@ -139,6 +141,7 @@ Example with all attributes:
     data-height="360"
     data-loading="eager"
     data-allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+    data-allowfullscreen="true"
     data-show-title="true"
     data-show-time="false"
 ></div>
