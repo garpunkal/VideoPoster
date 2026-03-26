@@ -4,9 +4,21 @@ import { createPoster, getPosterMetaSettings, setError, updatePosterMeta } from 
 import { fetchJsonWithTimeout, formatDuration } from "../utils.js";
 
 export function initVimeo(shell, videoUrl) {
-  function getVimeoId(url) {
+  function stripQueryAndFragment(url) {
     try {
       const parsed = new URL(url);
+      parsed.search = '';
+      parsed.hash = '';
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  function getVimeoId(url) {
+    try {
+      const cleanUrl = stripQueryAndFragment(url);
+      const parsed = new URL(cleanUrl);
       const host = parsed.hostname.replace(/^www\./, "");
       if (host !== "vimeo.com" && host !== "player.vimeo.com") {
         return null;
@@ -31,7 +43,9 @@ export function initVimeo(shell, videoUrl) {
     return `https://player.vimeo.com/video/${id}?${params.toString()}`;
   }
 
-  const id = getVimeoId(videoUrl);
+  // Always strip query and fragment for ID and all uses
+  const cleanUrl = stripQueryAndFragment(videoUrl);
+  const id = getVimeoId(cleanUrl);
   if (!id) {
     setError(shell, "Invalid Vimeo URL");
     return;
