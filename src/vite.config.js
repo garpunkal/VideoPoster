@@ -7,14 +7,14 @@ export default defineConfig(({ command }) => ({
   // GitHub Pages project sites are served from /<repo-name>/.
   base: command === 'build' ? `/${repositoryName}/` : '/',
   build: {
-    minify: false,
+    minify: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
       },
       output: {
-        entryFileNames: 'videoposter.js',
-        assetFileNames: 'videoposter.[ext]',
+        entryFileNames: 'videoposter.min.js',
+        assetFileNames: 'videoposter.min.[ext]',
       },
     },
     outDir: 'dist',

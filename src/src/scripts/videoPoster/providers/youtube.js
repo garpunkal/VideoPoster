@@ -4,11 +4,24 @@ import { createPoster, getPosterMetaSettings, setError, updatePosterMeta } from 
 import { fetchJsonWithTimeout } from "../utils.js";
 
 export function initYouTube(shell, videoUrl) {
+  function stripQueryAndFragment(url) {
+    try {
+      const parsed = new URL(url);
+      parsed.search = '';
+      parsed.hash = '';
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
   function getYouTubeId(url) {
     try {
       const parsed = new URL(url);
       const host = parsed.hostname.replace(/^www\./, "");
-      if (host === "youtu.be") return parsed.pathname.slice(1);
+      if (host === "youtu.be") {
+        return parsed.pathname.replace(/^\//, "").split(/[/?#]/)[0];
+      }
       if ((host === "youtube.com" || host === "m.youtube.com") && parsed.searchParams.has("v")) {
         return parsed.searchParams.get("v");
       }
@@ -19,7 +32,8 @@ export function initYouTube(shell, videoUrl) {
     }
   }
 
-  function createYouTubeUrl(id, autoplay) {
+  function createYouTubeUrl(id, autoplay, originalUrl) {
+    // Start with default params
     const params = new URLSearchParams({
       autoplay: autoplay ? "1" : "0",
       mute: "0",
@@ -31,26 +45,43 @@ export function initYouTube(shell, videoUrl) {
       playsinline: "1",
       enablejsapi: "1"
     });
+    // Merge in any user-provided query params (e.g., start, rel, etc.)
+    try {
+      const parsed = new URL(originalUrl);
+      for (const [key, value] of parsed.searchParams.entries()) {
+        params.set(key, value);
+      }
+    } catch {}
     return `https://www.youtube.com/embed/${id}?${params.toString()}`;
   }
 
+  // Only strip query/fragment for thumbnail/oEmbed, not for ID extraction
   const id = getYouTubeId(videoUrl);
   if (!id) {
     setError(shell, "Invalid YouTube URL");
     return;
   }
+  const cleanUrl = stripQueryAndFragment(videoUrl);
 
   const titleFallback = "YouTube Video";
   const customPosterUrl = shell.getAttribute("data-poster-url") || "";
-  const thumbUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
+  const thumbUrl = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
   const initialPosterUrl = customPosterUrl || thumbUrl;
-  const iframe = createIframe(titleFallback, ALLOW.youtube);
+  const allowFullscreen = shell.dataset.allowfullscreen == null || !["false", "0", "no", "off"].includes(String(shell.dataset.allowfullscreen).trim().toLowerCase());
+  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.youtube, {
+    width: shell.dataset.width,
+    height: shell.dataset.height,
+    loading: shell.dataset.loading,
+    customTitle: shell.dataset.title,
+    allowFullscreen,
+    mediaId: shell.dataset.mediaId
+  });
   const metaSettings = getPosterMetaSettings(shell);
   const poster = createPoster(titleFallback, "--:--", initialPosterUrl, metaSettings);
 
   poster.addEventListener("click", function () {
     poster.classList.add("hidden");
-    iframe.src = createYouTubeUrl(id, true);
+    iframe.src = createYouTubeUrl(id, true, videoUrl);
     iframe.focus();
   }, { once: true });
 

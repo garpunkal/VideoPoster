@@ -4,9 +4,21 @@ import { createPoster, getPosterMetaSettings, setError, updatePosterMeta } from 
 import { fetchJsonWithTimeout, formatDuration } from "../utils.js";
 
 export function initVimeo(shell, videoUrl) {
-  function getVimeoId(url) {
+  function stripQueryAndFragment(url) {
     try {
       const parsed = new URL(url);
+      parsed.search = '';
+      parsed.hash = '';
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  function getVimeoId(url) {
+    try {
+      const cleanUrl = stripQueryAndFragment(url);
+      const parsed = new URL(cleanUrl);
       const host = parsed.hostname.replace(/^www\./, "");
       if (host !== "vimeo.com" && host !== "player.vimeo.com") {
         return null;
@@ -31,7 +43,9 @@ export function initVimeo(shell, videoUrl) {
     return `https://player.vimeo.com/video/${id}?${params.toString()}`;
   }
 
-  const id = getVimeoId(videoUrl);
+  // Always strip query and fragment for ID and all uses
+  const cleanUrl = stripQueryAndFragment(videoUrl);
+  const id = getVimeoId(cleanUrl);
   if (!id) {
     setError(shell, "Invalid Vimeo URL");
     return;
@@ -39,7 +53,15 @@ export function initVimeo(shell, videoUrl) {
 
   const titleFallback = "Vimeo Video";
   const customPosterUrl = shell.getAttribute("data-poster-url") || "";
-  const iframe = createIframe(titleFallback, ALLOW.vimeo);
+  const allowFullscreen = shell.dataset.allowfullscreen == null || !["false", "0", "no", "off"].includes(String(shell.dataset.allowfullscreen).trim().toLowerCase());
+  const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.vimeo, {
+    width: shell.dataset.width,
+    height: shell.dataset.height,
+    loading: shell.dataset.loading,
+    customTitle: shell.dataset.title,
+    allowFullscreen,
+    mediaId: shell.dataset.mediaId
+  });
   const metaSettings = getPosterMetaSettings(shell);
   const poster = createPoster(titleFallback, "--:--", customPosterUrl, metaSettings);
 

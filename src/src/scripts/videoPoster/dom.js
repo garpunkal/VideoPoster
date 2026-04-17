@@ -1,10 +1,16 @@
-export function createIframe(title, allow) {
+export function createIframe(title, allow, { width, height, loading, customTitle, allowFullscreen, mediaId } = {}) {
   const iframe = document.createElement("iframe");
-  iframe.title = title;
-  iframe.loading = "lazy";
-  iframe.allow = allow;
-  iframe.allowFullscreen = true;
+  iframe.setAttribute("data-cookieconsent", "ignore");
+  iframe.title = customTitle || title;
+  iframe.loading = loading || "lazy";
+  const effectiveAllow = allowFullscreen !== false && !/\bfullscreen\b/.test(allow)
+    ? `${allow}; fullscreen`
+    : allow;
+  iframe.allow = effectiveAllow;
   iframe.referrerPolicy = "strict-origin-when-cross-origin";
-  iframe.sandbox = "allow-scripts allow-same-origin allow-presentation allow-popups";
+
+  if (width) iframe.width = width;
+  if (height) iframe.height = height;
+  if (mediaId) iframe.id = mediaId;
   return iframe;
 }
