@@ -123,6 +123,7 @@
   display: none;
 }
 
+
 .vp-container .play-badge {
   position: absolute;
   right: -8px;
@@ -130,7 +131,7 @@
   width: 100px;
   height: 100px;
   border-top-left-radius: 18px;
-  background: #1c2431;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,18 +149,18 @@
 }
 
 .vp-container .poster .play-glyph {
-  color: #e5b80b;
+  color: #1c2431;
 }
 
 .vp-container .poster:hover .play-badge,
 .vp-container .poster:focus-visible .play-badge {
   transform: scale(1.14);
-  background: #e5b80b;
-  color: #1c2431;
+  background: #6CADAD;
+  color: #fff;
 }
 .vp-container .poster:hover .play-glyph,
 .vp-container .poster:focus-visible .play-glyph {
-  color: #1c2431;
+  color: #fff;
 }
 
 .vp-container .sr-only {
