@@ -73,13 +73,19 @@ export function initVimeo(shell, videoUrl) {
 
   shell.append(iframe, poster);
 
+
   fetchJsonWithTimeout(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`)
     .then(data => {
       if (data && data.title) {
         updatePosterMeta(poster, { title: data.title });
       }
       if (!customPosterUrl && data && data.thumbnail_url) {
-        updatePosterMeta(poster, { thumbUrl: data.thumbnail_url });
+        // Try to get a higher resolution thumbnail (1280x720)
+        let highResThumb = data.thumbnail_url;
+        // Vimeo thumbnails often have a size in the filename, e.g. _295x166.jpg
+        // Replace it with _1280.jpg for higher quality
+        highResThumb = highResThumb.replace(/_[0-9]+x[0-9]+(\.[a-z]+)$/i, '_1280$1');
+        updatePosterMeta(poster, { thumbUrl: highResThumb });
       }
       if (data && data.duration) {
         updatePosterMeta(poster, { time: formatDuration(data.duration) });
