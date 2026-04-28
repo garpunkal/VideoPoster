@@ -80,11 +80,22 @@ export function initVimeo(shell, videoUrl) {
         updatePosterMeta(poster, { title: data.title });
       }
       if (!customPosterUrl && data && data.thumbnail_url) {
-        // Try to get a higher resolution thumbnail (1280x720)
-        let highResThumb = data.thumbnail_url;
-        // Vimeo thumbnails often have a size in the filename, e.g. _295x166.jpg
-        // Replace it with _1280.jpg for higher quality
-        highResThumb = highResThumb.replace(/_[0-9]+x[0-9]+(\.[a-z]+)$/i, '_1280$1');
+        // Always set the highest-res thumbnail URL directly; let the browser handle fallback
+        const thumbBase = data.thumbnail_url;
+        let highResThumb = thumbBase
+          // Handles _295x166.jpg, _295x166?region=us, _640.jpg, _640?region=us
+          .replace(/_[0-9]+x[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1920x1080$1')
+          .replace(/_[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1920x1080$1');
+        if (highResThumb === thumbBase) {
+          highResThumb = thumbBase
+            .replace(/_[0-9]+x[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1280x720$1')
+            .replace(/_[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1280x720$1');
+        }
+        if (highResThumb === thumbBase) {
+          highResThumb = thumbBase
+            .replace(/_[0-9]+x[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1280$1')
+            .replace(/_[0-9]+((\.[a-z]+)?(\?.*)?)$/i, '_1280$1');
+        }
         updatePosterMeta(poster, { thumbUrl: highResThumb });
       }
       if (data && data.duration) {
@@ -94,3 +105,4 @@ export function initVimeo(shell, videoUrl) {
 
   updatePosterMeta(poster, { title: titleFallback, time: "--:--" });
 }
+ 
