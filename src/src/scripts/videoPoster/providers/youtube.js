@@ -1,7 +1,7 @@
 import { ALLOW } from "../constants.js";
 import { createIframe } from "../dom.js";
 import { createPoster, getPosterMetaSettings, setError, updatePosterMeta } from "../poster.js";
-import { fetchJsonWithTimeout } from "../utils.js";
+import { fetchJsonWithTimeout, resolveThumbUrl } from "../utils.js";
 
 export function initYouTube(shell, videoUrl) {
   function stripQueryAndFragment(url) {
@@ -65,8 +65,12 @@ export function initYouTube(shell, videoUrl) {
 
   const titleFallback = "YouTube Video";
   const customPosterUrl = shell.getAttribute("data-poster-url") || "";
-  const thumbUrl = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-  const initialPosterUrl = customPosterUrl || thumbUrl;
+  const thumbCandidates = [
+    `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/sddefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+  ];
+  const initialPosterUrl = customPosterUrl || thumbCandidates[thumbCandidates.length - 1];
   const allowFullscreen = shell.dataset.allowfullscreen == null || !["false", "0", "no", "off"].includes(String(shell.dataset.allowfullscreen).trim().toLowerCase());
   const iframe = createIframe(titleFallback, shell.dataset.allow || ALLOW.youtube, {
     width: shell.dataset.width,
@@ -94,9 +98,11 @@ export function initYouTube(shell, videoUrl) {
       }
     });
 
-  const posterMeta = { title: titleFallback, time: "--:--" };
+  updatePosterMeta(poster, { title: titleFallback, time: "--:--" });
+
   if (!customPosterUrl) {
-    posterMeta.thumbUrl = thumbUrl;
+    resolveThumbUrl(thumbCandidates).then(function (thumbUrl) {
+      updatePosterMeta(poster, { thumbUrl });
+    });
   }
-  updatePosterMeta(poster, posterMeta);
 }
